@@ -181,7 +181,7 @@ def runtime(db, socket_in, socket_out):
 			reply = "Unknown cmd: " + message
 			socket_out.send_string(reply)
 
-mdb = myDB("2024_01_02.db")
+mdb = myDB("2025_01_01.db")
 mdb.init_table()
 subscriber,publisher = init_zmq("192.168.2.13", ["10000","10001"], "10010")
 

@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 from time import sleep
 from datetime import datetime
@@ -12,8 +13,11 @@ def initialize_browser():
 	  #object of Options class
 	c = Options()
 	c.add_argument("--headless")
+	c.add_argument("--no-sandbox")
 
-	Browser = webdriver.Chrome(executable_path="/usr/lib/chromium-browser/chromedriver", options=c)
+	path_to_chromedriver = "/usr/lib/chromium-browser/chromedriver"
+
+	Browser = webdriver.Chrome(service=Service(path_to_chromedriver), options=c)
 	Browser.implicitly_wait(5)
 	Browser.get("http://192.168.2.12/login.htm")
 	return Browser
@@ -113,6 +117,7 @@ def get_reply(socket):
 	message = socket.recv_string()
 	print("received: %s" % message)
 
+
 B = initialize_browser()
 T,A = initialize_arrays()
 
@@ -121,6 +126,8 @@ B = check_n_login(B)
 mZMQ = init_zmq()
 mZMQ = connect_zmq(mZMQ, "192.168.2.13", "10000")
 counter = 1
+
+file_path = "/var/www/html/index.html"
 
 while True:
 	ts = get_time_stamp()
@@ -133,6 +140,10 @@ while True:
 		T = refresh_total_data(B,T)
 		T = sanitaze_inputs(T)
 		send_update_total(mZMQ,ts,T)
+		with open(file_path, 'w') as file:
+			date = datetime.fromtimestamp(ts)
+			file.write(f"Last update: {date} \r")
+			file.close()
 
 	sleep(4)
 	counter = (counter+1) % 60
